@@ -1,0 +1,32 @@
+<!doctype html>
+
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>WASM test</title>
+</head>
+
+<body>
+<script>
+    let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    navigator.mediaDevices.getUserMedia({audio: true, video: true})
+        .then(function (stream) {
+            let source = audioCtx.createMediaStreamSource(stream);
+            let analyser = audioCtx.createAnalyser();
+            console.log(source);
+            console.log(analyser);
+            let dataArray = new Uint8Array(analyser.frequencyBinCount); // Uint8Array should be the same length as the frequencyBinCount
+
+            void analyser.getByteFrequencyData(dataArray);  // fill the Uint8Array with data returned from getByteFrequencyData()
+            console.log(dataArray.buffer);
+
+        }).catch(function (err) {
+        console.log('The following gUM error occurred: ' + err);
+    });
+
+</script>
+</body>
+
+</html>

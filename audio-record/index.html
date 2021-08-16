@@ -1,0 +1,82 @@
+<html>
+  <head>
+    <title>Audio Recording</title>
+  </head>
+  <body>
+    <script>
+      //   (async () => {
+      //     const response = await fetch("simple.wasm");
+      //     const buffer = await response.arrayBuffer();
+      //     const module = await WebAssembly.compile(buffer);
+
+      if (window.Worker) {
+        const myWorker = new Worker("worker.js", { type: "module" });
+        //   myWorker.postMessage({ module: module});
+
+        myWorker.onmessage = function (oEvent) {
+          console.log(oEvent.data);
+        };
+
+        const constraints = { audio: true };
+        let chunks = [];
+
+        navigator.mediaDevices.getUserMedia(constraints).then((mediaStream) => {
+          const options = {
+            audioBitsPerSecond: 128 * 32,
+            mimeType: "audio/webm",
+          };
+          const recorder = new MediaRecorder(mediaStream, options);
+
+          // fires every one second and passes an BlobEvent
+          recorder.ondataavailable = (event) => {
+            const blob = event.data; // get the Blob from the event
+            //   console.log(blob);
+            if (blob.size > 0) {
+              myWorker.postMessage(blob);
+            }
+          };
+
+          recorder.onerror = (event) => {
+            console.log("recorder onerror");
+          };
+
+          recorder.onpause = (event) => {
+            console.log("recorder onpause ");
+          };
+
+          recorder.onstop = (event) => {
+            console.log("recorder onstop  ");
+          };
+
+          // make data available event fire every one second
+          recorder.start(1000);
+        });
+      } else {
+        console.log("Your browser doesn't support web workers.");
+      }
+      //   })();
+    </script>
+
+    <!-- <audio id="player" controls></audio>
+    <script>
+      const player = document.getElementById("player");
+
+      const handleSuccess = function (stream) {
+        if (window.URL) {
+          player.srcObject = stream;
+        } else {
+          player.src = stream;
+        }
+
+        const context = new AudioContext();
+        const source = context.createMediaStreamSource(stream);
+
+      };
+
+      navigator.mediaDevices
+        .getUserMedia({ audio: true, video: false })
+        .then(handleSuccess);
+    </script> -->
+    <!-- https://developers.google.com/web/fundamentals/media/recording-audio -->
+  </body>
+</html>
