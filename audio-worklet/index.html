@@ -20,6 +20,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="mobile-web-app-capable" content="yes" />
     <title>Hello Audio Worklet! | WebAudio Samples</title>
+    <script src="./lib/wave-heared.js"></script>
     <script src="./websocket.js"></script>
   </head>
   <body>
@@ -53,7 +54,10 @@
             node.connect(audioContext.destination);
 
             node.port.onmessage = (e) => {
-              console.log(e.data);
+              // OPEN
+              if (ws.readyState === 1) {
+                ws.send(JSON.stringify({data: e.data}));
+              }
             };
           });
       };
@@ -61,7 +65,7 @@
 
     <script>
       if (window.Worker) {
-        const myWorker = new Worker("worker.js");
+        const myWorker = new Worker("worker-video.js");
 
         myWorker.onmessage = function (oEvent) {
           console.log("[Main thread] Video Worker said : " + oEvent.data);
@@ -75,7 +79,7 @@
 
     <script>
       if (window.Worker) {
-        const myWorker2 = new Worker("worker2.js");
+        const myWorker2 = new Worker("worker-audio.js");
 
         myWorker2.onmessage = function (oEvent) {
           console.log("[Main thread] Audio Worker said : " + oEvent.data);

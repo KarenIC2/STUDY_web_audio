@@ -87,11 +87,21 @@ class WASMWorkletProcessor extends AudioWorkletProcessor {
     );
 
     let obj = null;
+    let sum = 0;
     for (let channel = 0; channel < channelCount; ++channel) {
       obj = this._heapOutputBuffer.getChannelData(channel);
+
       output[channel].set(obj);
-      //   obj = JSON.stringify(this._heapOutputBuffer.getChannelData(channel));
-      //   this.port.postMessage(obj);
+      sum = !!sum ? sum : obj.reduce((a, b) => a + b);
+    }
+
+    // console.log("sum:", sum);
+    if (sum !== 0) {
+      //   console.log(this._heapOutputBuffer.getChannelData(0)[0]);
+      obj = JSON.parse(
+        JSON.stringify(this._heapOutputBuffer.getChannelData(0))
+      );
+      this.port.postMessage(obj);
     }
 
     return true;
